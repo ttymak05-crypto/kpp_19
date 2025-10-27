@@ -1,85 +1,182 @@
 <!DOCTYPE html>
-<html>
+<html lang="uk">
 <head>
-  <meta charset="UTF-8">
-  <title>Моє Портфоліо</title>
-  <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
-  
-  <style>
-    body { 
-      font-family: Arial, sans-serif; 
-      margin: 0;
-      padding: 0;
-      background-color: #f0f2f5;
-    }
-    .container {
-      width: 90%;
-      max-width: 900px;
-      margin: 20px auto;
-      padding: 20px;
-      background-color: #ffffff;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-    h1, h2 {
-      color: #333;
-      border-bottom: 2px solid #007bff;
-      padding-bottom: 5px;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 15px;
-    }
-    th, td {
-      border: 1px solid #ddd;
-      padding: 10px;
-      text-align: left;
-    }
-    th {
-      background-color: #007bff;
-      color: white;
-    }
-    tr:nth-child(even) {
-      background-color: #f9f9f9;
-    }
-  </style>
+  <meta charset="UTF-8" />
+  <title>Matrix Chat</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/alpinejs" defer></script>
+
+  <!-- Адаптивність/PWA -->
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0ea5e9" />
+
+  <!-- CSP: дозволяємо Tailwind CDN + Alpine + eval (потрібно для Tailwind CDN) -->
+  <meta http-equiv="Content-Security-Policy"
+        content="
+          default-src 'self';
+          script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://unpkg.com;
+          style-src  'self' 'unsafe-inline';
+          img-src    'self' data:;
+          font-src   'self' data:;
+          connect-src 'self' https://matrix.org;
+        ">
 </head>
-<body>
-  <div class="container">
-    <h1>Моє портфоліо</h1>
-    <p>Вітаю! Це мій перший практичний проєкт в Electron.</p>
 
-    <h2>Мої навички</h2>
-    <ul>
-      <li>HTML5 — Основи</li>
-      <li>CSS — Базові стилі</li>
-      <li>JavaScript — Початківець</li>
-      <li>Electron — Встановлення та запуск</li>
-    </ul>
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+  <!-- Каркас компонента -->
+  <div x-data="chatApp()" class="bg-white p-6 rounded shadow-md w-96">
 
-    <h2>Мої проєкти</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Назва проєкту</th>
-          <th>Технологія</th>
-          <th>Статус</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>Перший додаток</td>
-          <td>Electron.js</td>
-          <td>В процесі</td>
-        </tr>
-        <tr>
-          <td>Портфоліо</td>
-          <td>HTML/CSS</td>
-          <td>Готово</td>
-        </tr>
-      </tbody>
-    </table>
+    <template x-if="!accessToken">
+      <div>
+        <h2 class="text-xl font-bold mb-4">Login</h2>
+
+        <input x-model.trim="username" placeholder="Username або @login:matrix.org"
+               class="border p-2 w-full mb-2 rounded outline-none focus:ring-2 focus:ring-sky-400" />
+
+        <input x-model="password" type="password" placeholder="Password"
+               class="border p-2 w-full mb-2 rounded outline-none focus:ring-2 focus:ring-sky-400" />
+
+        <button @click="login"
+                :disabled="loading || !username || !password"
+                class="bg-blue-500 hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition text-white p-2 w-full rounded flex items-center justify-center">
+          <svg x-show="loading" xmlns="http://www.w3.org/2000/svg" class="animate-spin h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke-width="4"></circle>
+            <path class="opacity-75" stroke-width="4" d="M4 12a8 8 0 018-8"></path>
+          </svg>
+          <span x-text="loading ? 'Входимо…' : 'Login'"></span>
+        </button>
+
+        <p x-text="error" class="text-red-600 mt-2 text-sm"></p>
+
+        <p class="text-xs text-gray-500 mt-3">
+          Немає облікового запису? Зареєструйтесь на
+          <a href="https://account.matrix.org/register?kind=manage_account"
+             class="text-sky-600 underline" target="_blank" rel="noreferrer">account.matrix.org</a>
+        </p>
+      </div>
+    </template>
+
+    <template x-if="accessToken">
+      <div>
+        <h1 class="text-lg font-semibold mb-3">Ви успішно авторизувались. Ваша панель керування</h1>
+
+        <div class="flex flex-col h-[550px]">
+          <div class="mb-2 p-2 bg-gray-100 rounded text-sm break-words">
+            <span class="font-bold">Your Matrix ID:</span>
+            <span class="ml-1" x-text="userId ? userId : 'Loading...'"></span>
+          </div>
+
+          <section class="grid grid-cols-1 gap-3">
+            <div class="border rounded-lg p-3">
+              <h3 class="font-semibold mb-2">Профіль</h3>
+              <ul class="text-sm space-y-1">
+                <li><span class="font-medium">Ім’я:</span> <span x-text="profile.name"></span></li>
+                <li><span class="font-medium">Email:</span> <span x-text="profile.email"></span></li>
+                <li><span class="font-medium">Місто:</span> <span x-text="profile.city"></span></li>
+              </ul>
+            </div>
+
+            <div class="border rounded-lg p-3">
+              <h3 class="font-semibold mb-2">Коротке резюме</h3>
+              <p class="text-sm leading-6" x-text="profile.summary"></p>
+
+              <h4 class="font-semibold mt-3 mb-1">Навички</h4>
+              <div class="mt-1 flex flex-wrap gap-2">
+                <template x-for="tag in profile.skills" :key="tag">
+                  <span class="px-2 py-1 border rounded-lg text-xs bg-gray-50" x-text="tag"></span>
+                </template>
+              </div>
+            </div>
+          </section>
+
+          <div class="mt-4 flex items-center justify-between">
+            <button @click="logout" class="text-sm px-3 py-2 rounded-lg border hover:bg-gray-50">Вийти</button>
+            <span class="text-xs text-gray-500">Порада: розгорніть розділ «Резюме» під свої дані</span>
+          </div>
+        </div>
+      </div>
+    </template>
   </div>
+
+  <script>
+    function chatApp() {
+      return {
+        username: '',
+        password: '',
+        accessToken: '',
+        userId: '',
+        error: '',
+        loading: false,
+
+        profile: {
+          name: 'Владислав',
+          email: 'tomchishenv@gmail.com',
+          city: 'Khmelnitskiy',
+          summary: 'gav-gav.',
+          skills: ['HTML', 'CSS/Tailwind', 'JavaScript', 'PWA', 'Alpine.js']
+        },
+
+        localizeError(code, fallback = 'Сталася помилка. Спробуйте ще раз.') {
+          const map = {
+            'M_FORBIDDEN': 'Доступ заборонено: невірні облікові дані.',
+            'M_USER_DEACTIVATED': 'Обліковий запис деактивовано.',
+            'M_LIMIT_EXCEEDED': 'Перевищено ліміт спроб. Спробуйте пізніше.',
+            'M_UNKNOWN_TOKEN': 'Невідомий або прострочений токен.',
+            'DEFAULT': fallback
+          };
+          return map[code] || map.DEFAULT;
+        },
+
+        async login() {
+          this.error = '';
+          this.loading = true;
+          try {
+            const res = await fetch('https://matrix.org/_matrix/client/r0/login', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                type: 'm.login.password',
+                user: this.username,
+                password: this.password
+              })
+            });
+            const data = await res.json();
+            if (data && data.access_token) {
+              this.accessToken = data.access_token;
+              this.userId = data.user_id || '';
+            } else {
+              const errCode = (data && data.errcode) || '';
+              this.error = this.localizeError(errCode, 'Помилка входу. Перевірте логін або пароль.');
+            }
+          } catch (e) {
+            this.error = 'Помилка мережі. Перевірте підключення до Інтернету.';
+            console.error(e);
+          } finally {
+            this.loading = false;
+          }
+        },
+
+        logout() {
+          this.username = '';
+          this.password = '';
+          this.accessToken = '';
+          this.userId = '';
+        }
+      }
+    }
+  </script>
+
+  <!-- Маленький діагностичний бейдж, якщо Alpine не піднявся -->
+  <script>
+    window.addEventListener('load', () => {
+      if (!window.Alpine) {
+        const warn = document.createElement('div');
+        warn.style.cssText = 'position:fixed;bottom:10px;left:10px;background:#fee;border:1px solid #f99;padding:8px 12px;border-radius:8px;font:14px/1.3 system-ui';
+        warn.textContent = 'Alpine.js не завантажився. Перевірте інтернет або CSP.';
+        document.body.appendChild(warn);
+      }
+    });
+  </script>
 </body>
 </html>

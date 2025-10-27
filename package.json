@@ -1,15 +1,11 @@
 {
-  "name": "my-electron-app",
+  "name": "matrix-chat-pwa",
   "version": "1.0.0",
-  "description": "My first Electron app",
   "main": "main.js",
   "scripts": {
     "start": "electron ."
   },
-  "keywords": [],
-  "author": "Vladick Tomchyshyn",
-  "license": "ISC",
   "devDependencies": {
-    "electron": "^31.0.1"
+    "electron": "^31.0.0"
   }
 }
