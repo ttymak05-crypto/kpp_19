@@ -2,68 +2,24 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';" />
-  
-  <style>
-    body { 
-      font-family: Arial, sans-serif; 
-      margin: 0;
-      padding: 0;
-      background-color: #f0f2f5;
-    }
-    .container {
-      width: 90%;
-      max-width: 900px;
-      margin: 20px auto;
-      padding: 20px;
-      background-color: #ffffff;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-    h1, h2 {
-      color: #333;
-      border-bottom: 2px solid #007bff;
-      padding-bottom: 5px;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 15px;
-    }
-    th, td {
-      border: 1px solid #ddd;
-      padding: 10px;
-      text-align: left;
-    }
-    th {
-      background-color: #007bff;
-      color: white;
-    }
-    tr:nth-child(even) {
-      background-color: #f9f9f9;
-    }
-  </style>
   <title>Matrix Chat</title>
-
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/alpinejs" defer></script>
 
+  <link rel="stylesheet" href="./index.css">
+
   <script src="./login/login.js"></script>
   <script src="./sidebar/sidebar.js"></script>
-
-  <link rel="stylesheet" href="./index.css">
-  <link rel="stylesheet" href="./login/login.css">
-  <link rel="stylesheet" href="./sidebar/sidebar.css">
+  <script src="./chat/chat.js"></script>
 </head>
 
 <body class="bg-gray-100 flex items-center justify-center p-4">
-
   <div x-data="chatApp()" class="chat-container bg-white rounded-lg shadow-lg flex w-full max-w-5xl">
     <div id="sidebar-container"></div>
 
     <div class="chat-area p-4 flex flex-col">
       <div id="login-container"></div>
-
+      <div id="chat-container" class="chat-container"></div>
     </div>
   </div>
 
@@ -82,6 +38,13 @@
           document.getElementById('sidebar-container').innerHTML = html;
         })
         .catch(error => console.error('Error loading sidebar:', error));
+
+      fetch('./chat/chat.html')
+        .then(response => response.text())
+        .then(html => {
+          document.getElementById('chat-container').innerHTML = html;
+        })
+        .catch(error => console.error('Error loading chat:', error));
     });
 
     function chatApp() {
@@ -100,11 +63,15 @@
         inviteUser: '',
         error: '',
         lastSyncToken: '',
-
         login,
         createRoom,
         fetchRoomsWithNames,
-
+        joinRoom,
+        inviteUserToRoom,
+        getRoomName,
+        switchRoom,
+        sendMessage,
+        fetchMessages
       }
     }
   </script>
