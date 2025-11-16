@@ -24,18 +24,15 @@ async function createRoom() {
       this.lastSyncToken = '';
 
       await this.fetchRoomsWithNames();
-      if (typeof this.fetchMessages === 'function') {
-        this.fetchMessages();
-      }
+      this.fetchMessages();
+      this.fetchRoomMembers();   
 
       this.inviteUser = '';
       alert(`Room ${this.newRoomName} created with ID: ${this.newRoomId}`);
     } else {
-      console.error('Create room failed:', data);
       alert('Create room failed: ' + (data.error || 'Unknown error'));
     }
   } catch (e) {
-    console.error('Create room error:', e);
     alert('Create room error: ' + e.message);
   }
 }
@@ -70,9 +67,8 @@ async function fetchRoomsWithNames() {
 
       if (this.rooms.length > 0 && !this.roomId) {
         this.roomId = this.rooms[0].roomId;
-        if (typeof this.fetchMessages === 'function') {
-          this.fetchMessages();
-        }
+        this.fetchMessages();
+        this.fetchRoomMembers();  
       }
     }
   } catch (e) {
@@ -86,69 +82,10 @@ function getRoomName(roomId) {
 
 function switchRoom(roomId) {
   if (roomId) this.roomId = roomId;
+
   this.messages = [];
   this.lastSyncToken = '';
+
   this.fetchMessages();
-}
-
-async function inviteUserToRoom() {
-  if (!this.inviteUser.trim() || !this.roomId) {
-    console.warn('No inviteUser or roomId');
-    return;
-  }
-
-  try {
-    const res = await fetch(`https://matrix.org/_matrix/client/r0/rooms/${this.roomId}/invite`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${this.accessToken}`
-      },
-      body: JSON.stringify({ user_id: this.inviteUser.trim() })
-    });
-
-    const data = await res.json();
-
-    if (data.errcode) {
-      console.error('Invite failed:', data);
-      alert('Invite failed: ' + (data.error || 'Unknown error'));
-    } else {
-      this.inviteUser = '';
-      alert('User invited to ' + this.roomId);
-      await this.fetchRoomsWithNames();
-    }
-  } catch (e) {
-    console.error('Invite error:', e);
-    alert('Invite error: ' + e.message);
-  }
-}
-
-async function joinRoom() {
-  if (!this.joinRoomId.trim()) return;
-
-  try {
-    const res = await fetch(`https://matrix.org/_matrix/client/r0/join/${encodeURIComponent(this.joinRoomId.trim())}`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${this.accessToken}`
-      }
-    });
-
-    const data = await res.json();
-
-    if (data.room_id) {
-      this.roomId = this.joinRoomId.trim();
-      this.joinRoomId = '';
-      this.messages = [];
-      this.lastSyncToken = '';
-      await this.fetchRoomsWithNames();
-      this.fetchMessages();
-    } else {
-      console.error('Join failed:', data);
-      alert('Join failed: ' + (data.error || 'Unknown error'));
-    }
-  } catch (e) {
-    console.error('Join room error:', e);
-    alert('Join room error: ' + e.message);
-  }
+  this.fetchRoomMembers(); 
 }

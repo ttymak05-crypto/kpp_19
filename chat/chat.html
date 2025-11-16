@@ -10,9 +10,9 @@
         <span
           x-text="roomId || 'Not selected'"
           class="ml-1 bg-gray-100 p-1 rounded cursor-pointer hover:bg-gray-300"
-          @click="$clipboard(roomId)">
-        </span>
-        <span class="text-xs text-gray-500 ml-1">(Click to copy)</span>
+          @click="roomId && navigator.clipboard && navigator.clipboard.writeText(roomId)"
+        ></span>
+        <span class="text-xs text-gray-500 ml-1" x-show="roomId">(Click to copy)</span>
       </div>
     </div>
 
@@ -39,31 +39,6 @@
         class="bg-green-500 text-white p-2 w-full rounded hover:bg-green-600 transition">
         Send
       </button>
-    </div>
-
-    <div class="space-y-2">
-      <div>
-        <input
-          x-model="inviteUser"
-          placeholder="Invite user (e.g., @user:matrix.org)"
-          class="border p-2 w-full mb-1 rounded">
-        <button
-          @click="inviteUserToRoom()"
-          class="bg-purple-500 text-white p-2 w-full rounded hover:bg-purple-600 transition">
-          Invite
-        </button>
-      </div>
-      <div>
-        <input
-          x-model="joinRoomId"
-          placeholder="Room ID to join (e.g., !roomId:matrix.org)"
-          class="border p-2 w-full mb-1 rounded">
-        <button
-          @click="joinRoom()"
-          class="bg-yellow-500 text-white p-2 w-full rounded hover:bg-yellow-600 transition">
-          Join Room
-        </button>
-      </div>
     </div>
   </div>
 </template>

@@ -61,8 +61,8 @@ async function fetchMessages() {
       }
 
       if (data.rooms?.invite) {
-        for (const [room] of Object.entries(data.rooms.invite)) {
-          await this.joinRoom(room);
+        for (const [roomId] of Object.entries(data.rooms.invite)) {
+          await this.joinRoom(roomId);  
         }
       }
 

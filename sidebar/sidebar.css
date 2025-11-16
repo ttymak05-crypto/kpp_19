@@ -1,17 +1,36 @@
+
 .sidebar {
-  min-width: 250px;
+    min-width: 260px;
+}
+
+.rooms-box {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;      
+    border-radius: 4px;
+    padding: 4px;
+    max-height: 76vh;              
+    overflow-y: auto;               
+}
+
+.room-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
 }
 
 .room-list li {
-  padding: 8px;
-  transition: background-color 0.2s;
+    padding: 6px 8px;
+    font-size: 0.9rem;
+    transition: background-color 0.15s;
 }
 
 .room-list li:hover {
-  background-color: #e0e7ff;
+    background-color: #e0e7ff;      
 }
 
+
 .room-list li.active {
-  background-color: #bfdbfe;
-  font-weight: 500;
+    background-color: #3b82f6;      
+    color: #ffffff;
+    font-weight: 500;
 }
