@@ -1,5 +1,5 @@
 {
-  "name": "my-electron-app",
+  "name": "project",
   "version": "1.0.0",
   "description": "My first Electron app",
   "main": "main.js",
@@ -7,9 +7,10 @@
     "start": "electron ."
   },
   "keywords": [],
-  "author": "Vladick Tomchyshyn",
+  "author": "Vladyslav Tomchyshyn",
   "license": "ISC",
   "devDependencies": {
-    "electron": "^31.0.1"
+    "electron": "^38.3.0",
+    "prettier": "3.6.2"
   }
 }
