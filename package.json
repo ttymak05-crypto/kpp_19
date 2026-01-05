@@ -1,15 +1,27 @@
 {
-  "name": "my-electron-app",
+  "name": "kpp19",
   "version": "1.0.0",
-  "description": "My first Electron app",
-  "main": "main.js",
+  "description": "",
+  "main": "index.js",
   "scripts": {
-    "start": "electron ."
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js"
   },
   "keywords": [],
-  "author": "Vladick Tomchyshyn",
+  "author": "Vladyslav Tomchyshyn",
   "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dompurify": "^3.3.1",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.2.1",
+    "express-validator": "^7.3.1",
+    "helmet": "^8.1.0",
+    "jsdom": "^27.3.0",
+    "morgan": "^1.10.1"
+  },
   "devDependencies": {
-    "electron": "^31.0.1"
+    "nodemon": "^3.1.11"
   }
 }
